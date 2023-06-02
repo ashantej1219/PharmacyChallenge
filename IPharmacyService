@@ -1,0 +1,12 @@
+using PharmacyApi.Models.Domain;
+using PharmacyApi.Models.Requests;
+
+namespace PharmacyApi.Services
+{
+    public interface IPharmacyService
+    {
+        Pharmacy GetPharmacyById(int id);
+        void Update(PharmacyUpdateRequest model, int userId);
+        List<Pharmacy> GetAll();
+    }
+}
