@@ -1,0 +1,93 @@
+using PharmacyApi.Models.Domain;
+using PharmacyApi.Models.Interfaces;
+using PharmacyApi.Models.Requests;
+using System.Data;
+using System.Data.SqlClient;
+
+namespace PharmacyApi.Services
+{
+    public class PharmacyService : IPharmacyService
+    {
+        private IDataProvider _data = null;
+
+        public PharmacyService(IDataProvider data)
+        {
+            _data = data;
+        }
+
+        public List<Pharmacy> GetAll()
+        {
+            List<Pharmacy> list = null;
+            string procName = "[dbo].[Pharmacies_SelectAll]";
+
+            _data.ExecuteCmd(procName, inputParamMapper: null,
+                singleRecordMapper: delegate (IDataReader reader, short set)
+                {
+                    int startingIndex = 0;
+                    Pharmacy aPharmacy = MapSinglePharmacy(reader, ref startingIndex);
+
+                    if (list == null)
+                    {
+                        list = new List<Pharmacy>();
+                    }
+
+                    list.Add(aPharmacy);
+                });
+
+            return list;
+        }
+        
+        public Pharmacy GetPharmacyById(int id)
+        {
+            string procName = "[dbo].[Pharmacies_SelectById]";
+            Pharmacy pharmacy = null;
+
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@Id", id);
+            }, delegate (System.Data.IDataReader reader, short set)
+            {
+                int startingIndex = 0;
+                pharmacy = MapSinglePharmacy(reader, ref startingIndex);
+            });
+
+            return pharmacy;
+        }
+
+        public void Update(PharmacyUpdateRequest model, int userId)
+        {
+            string procName = "[dbo].[Pharmacies_Update]";
+            _data.ExecuteNonQuery(procName, inputParamMapper: delegate (SqlParameterCollection col)
+            {
+                col.AddWithValue("@Id", model.Id);
+                col.AddWithValue("@Name", model.Name);
+                col.AddWithValue("@Address", model.Address);
+                col.AddWithValue("@City", model.City);
+                col.AddWithValue("@State", model.State);
+                col.AddWithValue("@Zip", model.Zip);
+                col.AddWithValue("@PrescriptionsFilled", model.PrescriptionsFilled);
+
+
+            }, returnParameters: null);
+        }
+
+        private Pharmacy MapSinglePharmacy(IDataReader reader, ref int startingIndex)
+        {
+            Pharmacy aPharmacy = new Pharmacy();
+
+            aPharmacy.Id = reader.GetSafeInt32(startingIndex++);
+            aPharmacy.Name = reader.GetSafeString(startingIndex++);
+            aPharmacy.Address = reader.GetSafeString(startingIndex++);
+            aPharmacy.City = reader.GetSafeString(startingIndex++);
+            aPharmacy.State = reader.GetSafeString(startingIndex++);
+            aPharmacy.Zip = reader.GetSafeString(startingIndex++);
+            aPharmacy.PrescriptionsFilled = reader.GetSafeInt32(startingIndex++);
+            aPharmacy.DateCreated = reader.GetDateTime(startingIndex++);
+            aPharmacy.DateModified = reader.GetDateTime(startingIndex++);
+
+            return aPharmacy;
+        }
+
+       
+    }
+}
