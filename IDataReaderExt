@@ -1,0 +1,20 @@
+using System.Data;
+
+namespace PharmacyApi.Models.Interfaces
+{
+    public static class IDataReaderExt
+    {
+        public static string GetSafeString(this IDataReader reader, int ordinal)
+        {
+            if (!reader.IsDBNull(ordinal))
+                return reader.GetString(ordinal);
+            else
+                return string.Empty;
+        }
+
+        public static int GetSafeInt32(this IDataReader reader, int ordinal)
+        {
+            return reader.IsDBNull(ordinal) ? 0 : reader.GetInt32(ordinal);
+        }
+    }
+}
