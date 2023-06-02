@@ -1,0 +1,53 @@
+using PharmacyApi.Models.Domain;
+using PharmacyApi.Models.Requests;
+using PharmacyApi.Services;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace PharmacyApi.Controllers
+{
+    [Route("api/pharmacies")]
+    [ApiController]
+    public class PharmacyApiController : ControllerBase
+    {
+        private IPharmacyService _pharmacyService;
+
+        public PharmacyApiController(IPharmacyService service)
+        {
+            _pharmacyService = service;
+        }
+
+        [HttpGet("pharmacy/{id:int}")]
+        public ActionResult<Pharmacy> Get(int id)
+        {
+            Pharmacy aPharmacy = _pharmacyService.GetPharmacyById(id);
+
+            if (aPharmacy == null)
+            {
+                return NotFound("Application Resource not found.");
+            }
+
+            return Ok(aPharmacy);
+        }
+
+        [HttpPut("{id:int}")]
+        public IActionResult Update(PharmacyUpdateRequest model, int id)
+        {
+            _pharmacyService.Update(model, id);
+            return Ok();
+        }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<Pharmacy>> GetAll()
+        {
+            List<Pharmacy> pharmacies = _pharmacyService.GetAll();
+
+            if (pharmacies == null)
+            {
+                return NotFound("Unable to find pharmacies.");
+            }
+
+            return Ok(pharmacies);
+        }
+    }
+}
