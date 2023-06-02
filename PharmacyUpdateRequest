@@ -1,0 +1,8 @@
+namespace PharmacyApi.Models.Requests
+{
+    public class PharmacyUpdateRequest : PharmacyAddRequest //example of inheritance
+
+    {
+        public int Id { get; set; }
+    }
+}
